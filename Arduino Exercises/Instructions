@@ -1,0 +1,9 @@
+It is required to:
+ * Learn about Arduino Uno.
+ * Apply examples and exercises over (ISIS Proteus) simulator.
+ 
+A folder is created for each member to upload the examples.
+
+Each member will make his/her own branch and upload the examples
+Then make a pull request to discuss the examples
+Finally merge it to the master branch.
