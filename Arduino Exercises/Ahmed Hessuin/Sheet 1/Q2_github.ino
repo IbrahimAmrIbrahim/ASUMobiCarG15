@@ -3,7 +3,7 @@ int led_2 = 1;
 int led_3 = 2; 
 int led_4 = 3;
 void setup() {
-  Serial.begin(9600);
+  
   // put your setup code here, to run once:
 pinMode(led_1,OUTPUT);
 pinMode(led_2,OUTPUT);
