@@ -1,0 +1,16 @@
+
+void setup (){
+
+pinMode(10,OUTPUT); 
+for (int i =3;i<10;i++){
+  pinMode(i,INPUT);
+  if (digitalRead(i)== 1){
+  digitalWrite(10,HIGH);
+  delay(4000*(pow(2,i-3)));
+ }// if
+ }//for
+ digitalWrite(10,LOW);
+}//setup
+void loop (){
+} 
+
