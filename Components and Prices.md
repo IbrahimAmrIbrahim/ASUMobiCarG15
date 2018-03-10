@@ -6,7 +6,7 @@
 |  Serial Bluetooth Module (Master/Slave) | 1 | 90 | 90 | 1) Easy Driving Application | FREE Electronics |
 |  Ultrasonic Sensor Module | 1 | 40 | 40 | 1) Easy Driving Application | FREE Electronics |
 |  Ultrasonic Sensor Mounting Bracket Holder for HC-SR04 , Big | 1 | 20 | 20 | 1) Easy Driving Application | FREE Electronics |
-|  Battery GTL 18650 5000mAh (Blue) | 3 | 100 | 300 | 1) Easy Driving Application | FREE Electronics |
+|  Battery GTL 18650 5000mAh | 3 | 100 | 300 | 1) Easy Driving Application | FREE Electronics |
 |  Battery Charger | 1 | 75 | 75 | 1) Easy Driving Application | FREE Electronics |
 |  Micro Servo Motor  | 1 | 60 | 60 | 1) Easy Driving Application | FREE Electronics |
 |  Line Follower Sensor - Digital  | 5 | 30 | 150 | 2) Line Tracking Application | FREE Electronics |
