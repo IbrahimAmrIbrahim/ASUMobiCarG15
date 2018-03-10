@@ -19,7 +19,7 @@ String BD = "";
 char IBD= 0;
 
 void Motion(byte Direction , byte MSpeed = 0 , byte RSpeed = 0);
-
+void Drive_T();
 
 void setup() {
   pinMode(MENA, OUTPUT);
@@ -54,7 +54,7 @@ void loop() {
     IBD = char(BTSerial.read());
     if (IBD == ';') {
       if (BD == "EDT" || BD == "edt") {
-       
+           Drive_T();
       }
       BD = "";
     } else {
@@ -211,3 +211,41 @@ void Motion(byte Direction , byte MSpeed = 0 , byte RSpeed = 0) {
 }
 
 
+void Drive_T() {
+  BTSerial.println("Easy Driving Mode");
+  while ((BD != "E") && (BD != "e")) {
+    if (BTSerial.available()) {
+      BD = char(BTSerial.read());
+      if (BD == "F" || BD == "f" )
+      {
+        Motion(0 , 100, 0);
+      }
+      else if (BD == "B" || BD == "b")
+      {
+        Motion(1 , 100, 0);
+      }
+      else if (BD == "R" || BD == "r" )
+      {
+        Motion(2 , 100, 25);
+      }
+      else if (BD == "L" || BD == "l")
+      {
+        Motion(3 , 100, 25);
+      }
+      else if (BD == "V" || BD == "v")
+      {
+        Motion(4 , 100, 25);
+      }
+      else if (BD == "W" || BD == "w")
+      {
+        Motion(5 , 100, 25);
+      } else if (BD == "A" || BD == "a")
+      {
+        Motion(2 , 100, 100);
+      } else {
+        Motion(6 , 0, 0);
+      }
+    }
+  }
+  BTSerial.println("Trminate easy Driving Mode");
+}
