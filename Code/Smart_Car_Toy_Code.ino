@@ -54,7 +54,7 @@ void loop() {
     IBD = char(BTSerial.read());
     if (IBD == ';') {
       if (BD == "EDT" || BD == "edt") {
-          void Drive_T();
+           Drive_T();
       }
       BD = "";
     } else {
