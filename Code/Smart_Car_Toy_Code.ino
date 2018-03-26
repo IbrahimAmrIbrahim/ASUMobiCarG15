@@ -12,6 +12,8 @@
 #define MIN3 5
 #define MIN4 6
 #define SERVO 9
+#define ping_tri 26
+#define ping_ecc 27
 
 Servo myservo;
 SoftwareSerial BTSerial(HC_05_TXD_ARDUINO_RXD, HC_05_RXD_ARDUINO_TXD); // RX | TX
