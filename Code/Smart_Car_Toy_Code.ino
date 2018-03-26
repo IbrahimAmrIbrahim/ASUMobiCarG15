@@ -17,9 +17,12 @@ Servo myservo;
 SoftwareSerial BTSerial(HC_05_TXD_ARDUINO_RXD, HC_05_RXD_ARDUINO_TXD); // RX | TX
 String BD = "";
 char IBD= 0;
+char IPBD = 0;
 
-void Motion(byte Direction , byte MSpeed = 0 , byte RSpeed = 0);
-void Drive_T();int ping_read();void anti_crush();
+void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
+void Drive_T();
+int ping_read();
+void anti_crush();
 
 void setup() {
   pinMode(MENA, OUTPUT);
@@ -63,7 +66,7 @@ void loop() {
   }
 }
 
-void Motion(byte Direction , byte MSpeed = 0 , byte RSpeed = 0) {
+void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0) {
   // Direction = 0 ----> Linear Motion Forward
   // Direction = 1 ----> Linear Motion Backward
   // Direction = 2 ----> Forward  Right Rotating
@@ -216,41 +219,66 @@ void Drive_T() {
   while ((BD != "E") && (BD != "e")) {
     if (BTSerial.available()) {
       BD = char(BTSerial.read());
-      if (BD == "F" || BD == "f" )
-      {
-        Motion(0 , 100, 0);
-      }
-      else if (BD == "B" || BD == "b")
-      {
-        Motion(1 , 100, 0);
-      }
-      else if (BD == "R" || BD == "r" )
-      {
-        Motion(2 , 100, 25);
-      }
-      else if (BD == "L" || BD == "l")
-      {
-        Motion(3 , 100, 25);
-      }
-      else if (BD == "V" || BD == "v")
-      {
-        Motion(4 , 100, 25);
-      }
-      else if (BD == "W" || BD == "w")
-      {
-        Motion(5 , 100, 25);
-      } else if (BD == "A" || BD == "a")
-      {
-        Motion(2 , 100, 100);
+      if (BD == "F" || BD == "f" ) {
+        if (IPBD == 'F') {
+          Motion(0 , 100, 0);
+        } else {
+          Motion(6 , 0, 0);
+          IPBD = 'F';
+        }
+      } else if (BD == "B" || BD == "b") {
+       if (IPBD == 'B') {
+          Motion(1 , 100, 0);
+        } else {
+          Motion(6 , 0, 0);
+          IPBD = 'B';
+        }
+      } else if (BD == "R" || BD == "r" ) {
+         if (IPBD == 'R') {
+          Motion(2 , 100, 25);
+        } else {
+          Motion(6 , 0, 0);
+          IPBD = 'R';
+        }
+      } else if (BD == "L" || BD == "l") {
+        if (IPBD == 'L') {
+          Motion(3 , 100, 25);
+        } else {
+          Motion(6 , 0, 0);
+          IPBD = 'L';
+        }
+      } else if (BD == "V" || BD == "v") {
+        if (IPBD == 'V') {
+          Motion(4 , 100, 25);
+        } else {
+          Motion(6 , 0, 0);
+          IPBD = 'V';
+        }
+      } else if (BD == "W" || BD == "w") {
+        if (IPBD == 'W') {
+          Motion(5 , 100, 25);
+        } else {
+          Motion(6 , 0, 0);
+          IPBD = 'W';
+        }
+      } else if (BD == "A" || BD == "a") {
+        if (IPBD == 'A') {
+          Motion(2 , 100, 100);
+        } else {
+          Motion(6 , 0, 0);
+          IPBD = 'A';
+        }
       } else {
         Motion(6 , 0, 0);
+        IPBD = 'S';
       }
     }
   }
   BTSerial.println("Trminate easy Driving Mode");
 }
-//======================================================//
-int ping_read(){// read the distance infront of the ping
+
+// read the distance infront of the ping
+int ping_read(){
   unsigned int  cm ,duration;
   pinMode(ping_tri, OUTPUT);
   digitalWrite(ping_tri, LOW);
@@ -264,9 +292,10 @@ int ping_read(){// read the distance infront of the ping
   delay(2);
  return cm;
 }
-//====================================//
-void  anti_crush(){// if the distance less than 15 cm STOP!
+
+// if the distance less than 15 cm STOP!
+void  anti_crush(){
   if (ping_read() <= 15 ){
   Motion(6);
-  }// if
-}// void anti_crush
+  }
+}
