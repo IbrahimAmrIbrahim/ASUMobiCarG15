@@ -21,6 +21,8 @@ char IPBD = 0;
 
 void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
 void Drive_T();
+int ping_read();
+void anti_crush();
 
 void setup() {
   pinMode(MENA, OUTPUT);
@@ -273,4 +275,27 @@ void Drive_T() {
     }
   }
   BTSerial.println("Trminate easy Driving Mode");
+}
+
+// read the distance infront of the ping
+int ping_read(){
+  unsigned int  cm ,duration;
+  pinMode(ping_tri, OUTPUT);
+  digitalWrite(ping_tri, LOW);
+  delayMicroseconds(2);
+  digitalWrite(ping_tri, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(ping_tri, LOW);
+  pinMode(ping_ecc, INPUT);
+  duration = pulseIn(ping_ecc, HIGH);
+  cm = duration / 29 / 2 ;
+  delay(2);
+ return cm;
+}
+
+// if the distance less than 15 cm STOP!
+void  anti_crush(){
+  if (ping_read() <= 15 ){
+  Motion(6);
+  }
 }
