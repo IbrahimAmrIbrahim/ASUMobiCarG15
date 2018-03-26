@@ -18,12 +18,12 @@ SoftwareSerial BTSerial(HC_05_TXD_ARDUINO_RXD, HC_05_RXD_ARDUINO_TXD); // RX | T
 String BD = "";
 char IBD= 0;
 char IPBD = 0;
-
+// ============================functions ===========================//
 void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
 void Drive_T();
 int ping_read();
 void anti_crush();
-
+//==============================================================================//
 void setup() {
   pinMode(MENA, OUTPUT);
   digitalWrite(MENA, HIGH);
@@ -58,6 +58,7 @@ void loop() {
     if (IBD == ';') {
       if (BD == "EDT" || BD == "edt") {
            Drive_T();
+           anti_crush();// after taking the order do the anit_crush
       }
       BD = "";
     } else {
