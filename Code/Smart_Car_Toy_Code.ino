@@ -1,6 +1,6 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
-
+// request 
 #define HC_05_TXD_ARDUINO_RXD 10
 #define HC_05_RXD_ARDUINO_TXD 11
 #define MENA 22
@@ -48,7 +48,7 @@ void setup() {
   myservo.attach(SERVO);
   myservo.write(90);
 
-  Serial.begin(9600);
+  Serial.begin(9600); // pc serial
   BTSerial.begin(9600);  // HC-05 default speed in AT command mode
   BTSerial.println("Car is ready");
 
@@ -225,10 +225,14 @@ void Drive_T() {
       BD = char(BTSerial.read());
       if (BD == "F" || BD == "f" ) {
         if (IPBD == 'F') {
+           if (anti_crush()){//
           Motion(0 , 100, 0);
+           }// if anti crush
         } else {
           Motion(6 , 0, 0);
           IPBD = 'F';
+           servo_cheak(IPBD);
+           delay(250);
         }
       } else if (BD == "B" || BD == "b") {
        if (IPBD == 'B') {
@@ -236,20 +240,29 @@ void Drive_T() {
         } else {
           Motion(6 , 0, 0);
           IPBD = 'B';
+         servo_cheak(f);// to  look forward 
         }
       } else if (BD == "R" || BD == "r" ) {
          if (IPBD == 'R') {
+            if (anti_crush()){//
           Motion(2 , 100, 25);
+            }// if anti crush
         } else {
           Motion(6 , 0, 0);
           IPBD = 'R';
+            servo_cheak(IPBD);
+           delay(250);
         }
       } else if (BD == "L" || BD == "l") {
-        if (IPBD == 'L') {
+        if (IPBD == 'L') {//
+           if (anti_crush()){
           Motion(3 , 100, 25);
+           }// if anti crush
         } else {
           Motion(6 , 0, 0);
           IPBD = 'L';
+           servo_cheak(IPBD);
+           delay(250);
         }
       } else if (BD == "V" || BD == "v") {
         if (IPBD == 'V') {
@@ -282,6 +295,23 @@ void Drive_T() {
 }
 
 // read the distance infront of the ping
+/*int ping_read(){ // hessuin was here xD
+  unsigned int  cm ,duration;
+  pinMode(ping_tri, OUTPUT);
+  digitalWrite(ping_tri, LOW);
+  delayMicroseconds(2);
+  digitalWrite(ping_tri, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(ping_tri, LOW);
+  pinMode(ping_ecc, INPUT);
+  duration = pulseIn(ping_ecc, HIGH);
+  cm = duration / 29 / 2 ;
+  delay(2);
+ return cm;
+}*/
+
+// return the ping measured distance
+
 int ping_read(){
   unsigned int  cm ,duration;
   pinMode(ping_tri, OUTPUT);
@@ -297,24 +327,7 @@ int ping_read(){
  return cm;
 }
 
-// if the distance less than 15 cm STOP!
-
-int ping_read(){
-  unsigned int  cm ,duration;
-  pinMode(ping_tri, OUTPUT);
-  digitalWrite(ping_tri, LOW);
-  delayMicroseconds(2);
-  digitalWrite(ping_tri, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(ping_tri, LOW);
-  pinMode(ping_ecc, INPUT);
-  duration = pulseIn(ping_ecc, HIGH);
-  cm = duration / 29 / 2 ;
-  delay(2);
- return cm;
-}
-
-// if the distance less than 15 cm STOP!
+// if the distance less than 15 cm stop + false , if distance > 15 = do nothing + true 
 bool  anti_crush(){
   if (ping_read() <= 15 ){
   Motion(6,0,0);
