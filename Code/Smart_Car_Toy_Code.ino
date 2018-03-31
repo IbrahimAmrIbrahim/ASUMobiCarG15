@@ -20,11 +20,13 @@ SoftwareSerial BTSerial(HC_05_TXD_ARDUINO_RXD, HC_05_RXD_ARDUINO_TXD); // RX | T
 String BD = "";
 char IBD= 0;
 char IPBD = 0;
+char SV='f';
 
 void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
 void Drive_T();
 int ping_read();
-void anti_crush();
+bool anti_crush();
+void servo_cheak(char a );
 
 void setup() {
   pinMode(MENA, OUTPUT);
@@ -296,8 +298,60 @@ int ping_read(){
 }
 
 // if the distance less than 15 cm STOP!
-void  anti_crush(){
+
+int ping_read(){
+  unsigned int  cm ,duration;
+  pinMode(ping_tri, OUTPUT);
+  digitalWrite(ping_tri, LOW);
+  delayMicroseconds(2);
+  digitalWrite(ping_tri, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(ping_tri, LOW);
+  pinMode(ping_ecc, INPUT);
+  duration = pulseIn(ping_ecc, HIGH);
+  cm = duration / 29 / 2 ;
+  delay(2);
+ return cm;
+}
+
+// if the distance less than 15 cm STOP!
+bool  anti_crush(){
   if (ping_read() <= 15 ){
-  Motion(6);
+  Motion(6,0,0);
+  return false;
+  }
+  else
+  return true;
+}
+//servo
+void servo_cheak(char a ){
+       if (a=='f'||a=='F'){
+     if (SV=='f'){
+       }
+      else {
+      myservo.write(90);
+      SV='f';
+      
+            } //a=1
+  }
+  else if (a=='r'||a=='R'){
+if (SV=='r'){
+       }
+      else {
+      myservo.write(45);
+      SV='r';
+      
+            } //a=2
+    
+  }
+  else if (a=='l'||a=='L'){
+if (SV=='l'){
+       }
+      else {
+      myservo.write(135);
+      SV='l';
+      
+            } //a=3
+    
   }
 }
