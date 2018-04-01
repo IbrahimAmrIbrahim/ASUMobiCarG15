@@ -1,7 +1,7 @@
 # ASUMobiCarG15
 It is required to develop a Mobile Controlled Car. The car allow easy driving with obstacles avoidance, accurate movement, line tracking and more. 
  
-  
+
  
 ### Team members:
 
@@ -12,3 +12,6 @@ It is required to develop a Mobile Controlled Car. The car allow easy driving wi
 |  23083 | أحمد مدحت محمد كمال الصدفى | 2 |
 |  23026 | أحمد حسين أحمد إبراهيم خضر | 1 |
 |  23032 | أحمد خيري أبوبكر عبد الرحيم | 1 |
+
+
+ the link of phase 1 (easy driving) video is : https://youtu.be/0QlZfR41Fuo 
