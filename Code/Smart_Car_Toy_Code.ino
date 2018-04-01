@@ -282,22 +282,6 @@ void Drive_T() {
 }
 
 // read the distance infront of the ping
-int ping_read(){
-  unsigned int  cm ,duration;
-  pinMode(ping_tri, OUTPUT);
-  digitalWrite(ping_tri, LOW);
-  delayMicroseconds(2);
-  digitalWrite(ping_tri, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(ping_tri, LOW);
-  pinMode(ping_ecc, INPUT);
-  duration = pulseIn(ping_ecc, HIGH);
-  cm = duration / 29 / 2 ;
-  delay(2);
- return cm;
-}
-
-// if the distance less than 15 cm STOP!
 
 int ping_read(){
   unsigned int  cm ,duration;
