@@ -13,5 +13,8 @@ It is required to develop a Mobile Controlled Car. The car allow easy driving wi
 |  23026 | أحمد حسين أحمد إبراهيم خضر | 1 |
 |  23032 | أحمد خيري أبوبكر عبد الرحيم | 1 |
 
+##### Sheet of Materials & Cost:
+https://github.com/IbrahimAmrIbrahim/ASUMobiCarG15/blob/master/Components%20and%20Prices.md
 
- the link of phase 1 (easy driving) video is : https://youtu.be/0QlZfR41Fuo 
+##### Phase 1 (Easy Driving):
+https://youtu.be/0QlZfR41Fuo 
