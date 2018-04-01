@@ -225,10 +225,11 @@ void Drive_T() {
       BD = char(BTSerial.read());
       if (BD == "F" || BD == "f" ) {
         if (IPBD == 'F') {
-          Motion(0 , 100, 0);
+           if (anti_crush()){ Motion(0 , 100, 0);}
         } else {
           Motion(6 , 0, 0);
           IPBD = 'F';
+          servo_cheak(IPBD);
         }
       } else if (BD == "B" || BD == "b") {
        if (IPBD == 'B') {
@@ -239,17 +240,19 @@ void Drive_T() {
         }
       } else if (BD == "R" || BD == "r" ) {
          if (IPBD == 'R') {
-          Motion(2 , 100, 25);
+           if (anti_crush()){ Motion(2 , 100, 25);}
         } else {
           Motion(6 , 0, 0);
           IPBD = 'R';
+          servo_cheak(IPBD);
         }
       } else if (BD == "L" || BD == "l") {
         if (IPBD == 'L') {
-          Motion(3 , 100, 25);
+          if (anti_crush()){  Motion(3 , 100, 25);}
         } else {
           Motion(6 , 0, 0);
           IPBD = 'L';
+          servo_cheak(IPBD);
         }
       } else if (BD == "V" || BD == "v") {
         if (IPBD == 'V') {
@@ -314,6 +317,7 @@ void servo_cheak(char a ){
        }
       else {
       myservo.write(90);
+    delay(250);
       SV='f';
       
             } //a=1
@@ -323,6 +327,7 @@ if (SV=='r'){
        }
       else {
       myservo.write(45);
+        delay(250);
       SV='r';
       
             } //a=2
@@ -333,6 +338,7 @@ if (SV=='l'){
        }
       else {
       myservo.write(135);
+        delay(250);
       SV='l';
       
             } //a=3
