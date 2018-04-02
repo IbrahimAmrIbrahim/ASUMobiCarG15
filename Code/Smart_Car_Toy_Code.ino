@@ -225,7 +225,7 @@ void Drive_T() {
       BD = char(BTSerial.read());
       if (BD == "F" || BD == "f" ) {
         if (IPBD == 'F') {
-           if (anti_crush()){ Motion(0 , 100, 0);}
+           if (!anti_crush(15)){ Motion(0 , 100, 0);}
         } else {
           Motion(6 , 0, 0);
           IPBD = 'F';
@@ -240,7 +240,7 @@ void Drive_T() {
         }
       } else if (BD == "R" || BD == "r" ) {
          if (IPBD == 'R') {
-           if (anti_crush()){ Motion(2 , 100, 25);}
+           if (!anti_crush(15)){ Motion(2 , 100, 25);}
         } else {
           Motion(6 , 0, 0);
           IPBD = 'R';
@@ -248,7 +248,7 @@ void Drive_T() {
         }
       } else if (BD == "L" || BD == "l") {
         if (IPBD == 'L') {
-          if (anti_crush()){  Motion(3 , 100, 25);}
+          if (!anti_crush(15)){  Motion(3 , 100, 25);}
         } else {
           Motion(6 , 0, 0);
           IPBD = 'L';
@@ -302,13 +302,13 @@ int ping_read(){
 }
 
 // if the distance less than 15 cm STOP!
-bool  anti_crush(){
-  if (ping_read() <= 15 ){
+bool  anti_crush(int x ){// x distance in cm
+  if (ping_read() <= x ){ // if distance less than x ===> stop and return true 
   Motion(6,0,0);
-  return false;
+  return true;
   }
   else
-  return true;
+  return false;
 }
 //servo
 void servo_cheak(char a ){
