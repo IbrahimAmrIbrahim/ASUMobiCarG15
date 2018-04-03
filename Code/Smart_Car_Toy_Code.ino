@@ -1,16 +1,15 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
 
+//Bluetooth
 #define HC_05_TXD_ARDUINO_RXD 10
 #define HC_05_RXD_ARDUINO_TXD 11
-#define MENA 22
-#define MENB 23
-#define MENA_B 24
-#define MENB_B 25
+//Motor Driver
 #define MIN1 3
 #define MIN2 4
 #define MIN3 5
 #define MIN4 6
+//UltraSonic
 #define SERVO 9
 #define ping_tri 26
 #define ping_ecc 27
@@ -20,23 +19,15 @@ SoftwareSerial BTSerial(HC_05_TXD_ARDUINO_RXD, HC_05_RXD_ARDUINO_TXD); // RX | T
 String BD = "";
 char IBD= 0;
 char IPBD = 0;
-char SV='f';
 
 void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
 void Drive_T();
 int ping_read();
 bool anti_crush();
-void servo_cheak(char a );
+void servo_cheak(char a);
 
 void setup() {
-  pinMode(MENA, OUTPUT);
-  digitalWrite(MENA, HIGH);
-  pinMode(MENB, OUTPUT);
-  digitalWrite(MENB, HIGH);
-  pinMode(MENA_B, OUTPUT);
-  digitalWrite(MENA_B, HIGH);
-  pinMode(MENB_B, OUTPUT);
-  digitalWrite(MENB_B, HIGH);
+  //Motor Driver Pins
   pinMode(MIN1, OUTPUT);
   digitalWrite(MIN1, LOW);
   pinMode(MIN2, OUTPUT);
@@ -45,13 +36,17 @@ void setup() {
   digitalWrite(MIN3, LOW);
   pinMode(MIN4, OUTPUT);
   digitalWrite(MIN4, LOW);
+  
+  //UltraSonic Pins
+  pinMode(ping_tri, OUTPUT);
+  digitalWrite(ping_tri, LOW);
+  pinMode(ping_ecc, INPUT);
   myservo.attach(SERVO);
   myservo.write(90);
 
   Serial.begin(9600);
   BTSerial.begin(9600);  // HC-05 default speed in AT command mode
   BTSerial.println("Car is ready");
-
 }
 
 
@@ -62,6 +57,8 @@ void loop() {
     if (IBD == ';') {
       if (BD == "EDT" || BD == "edt") {
            Drive_T();
+      } else {
+        BTSerial.println("Wrong Command");
       }
       BD = "";
     } else {
@@ -219,28 +216,42 @@ void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0) {
 
 
 void Drive_T() {
+  //F || f ----> forward
+  //B || b ----> backward
+  //R || r ----> forward Right
+  //L || l ----> forward Left
+  //V || V ----> backward Right
+  //W || w ----> backward Left
+  //A || a ----> rotate around axis
+  //S || s ----> stop
   BTSerial.println("Easy Driving Mode");
   while ((BD != "E") && (BD != "e")) {
     if (BTSerial.available()) {
       BD = char(BTSerial.read());
-      if (BD == "F" || BD == "f" ) {
-        if (IPBD == 'F') {
-           if (!anti_crush(15)){ Motion(0 , 100, 0);}
-        } else {
-          Motion(6 , 0, 0);
-          IPBD = 'F';
-          servo_cheak(IPBD);
-        }
-      } else if (BD == "B" || BD == "b") {
-       if (IPBD == 'B') {
-          Motion(1 , 100, 0);
-        } else {
-          Motion(6 , 0, 0);
-          IPBD = 'B';
-        }
-      } else if (BD == "R" || BD == "r" ) {
-         if (IPBD == 'R') {
-           if (!anti_crush(15)){ Motion(2 , 100, 25);}
+    }
+    if (BD == "F" || BD == "f" ) {
+      if (IPBD == 'F') {
+         if (!anti_crush(15)){ 
+            Motion(0 , 100, 0);
+         }
+      } else {
+         Motion(6 , 0, 0);
+         IPBD = 'F';
+         servo_cheak(IPBD);
+      }
+    } else if (BD == "B" || BD == "b") {
+      if (IPBD == 'B') {
+         Motion(1 , 100, 0);
+       } else {
+         Motion(6 , 0, 0);
+         IPBD = 'B';
+         servo_cheak(IPBD);
+       }
+    } else if (BD == "R" || BD == "r" ) {
+      if (IPBD == 'R') {
+         if (!anti_crush(15)){
+            Motion(2 , 100, 25);
+           }
         } else {
           Motion(6 , 0, 0);
           IPBD = 'R';
@@ -248,7 +259,9 @@ void Drive_T() {
         }
       } else if (BD == "L" || BD == "l") {
         if (IPBD == 'L') {
-          if (!anti_crush(15)){  Motion(3 , 100, 25);}
+          if (!anti_crush(15)){
+            Motion(3 , 100, 25);
+          }
         } else {
           Motion(6 , 0, 0);
           IPBD = 'L';
@@ -260,6 +273,7 @@ void Drive_T() {
         } else {
           Motion(6 , 0, 0);
           IPBD = 'V';
+          servo_cheak(IPBD);
         }
       } else if (BD == "W" || BD == "w") {
         if (IPBD == 'W') {
@@ -267,6 +281,7 @@ void Drive_T() {
         } else {
           Motion(6 , 0, 0);
           IPBD = 'W';
+           servo_cheak(IPBD);
         }
       } else if (BD == "A" || BD == "a") {
         if (IPBD == 'A') {
@@ -274,74 +289,55 @@ void Drive_T() {
         } else {
           Motion(6 , 0, 0);
           IPBD = 'A';
+          servo_cheak(IPBD);
         }
       } else {
         Motion(6 , 0, 0);
         IPBD = 'S';
+        servo_cheak(IPBD);
       }
-    }
-  }
+   }
   BTSerial.println("Trminate easy Driving Mode");
 }
 
 // read the distance infront of the ping
-
 int ping_read(){
   unsigned int  cm ,duration;
-  pinMode(ping_tri, OUTPUT);
   digitalWrite(ping_tri, LOW);
   delayMicroseconds(2);
   digitalWrite(ping_tri, HIGH);
   delayMicroseconds(5);
   digitalWrite(ping_tri, LOW);
-  pinMode(ping_ecc, INPUT);
   duration = pulseIn(ping_ecc, HIGH);
   cm = duration / 29 / 2 ;
   delay(2);
  return cm;
 }
 
+
 // if the distance less than 15 cm STOP!
 bool  anti_crush(int x ){// x distance in cm
   if (ping_read() <= x ){ // if distance less than x ===> stop and return true 
   Motion(6,0,0);
   return true;
-  }
-  else
+  } else {
   return false;
+  }
 }
+
+
 //servo
-void servo_cheak(char a ){
-       if (a=='f'||a=='F'){
-     if (SV=='f'){
-       }
-      else {
-      myservo.write(90);
+void servo_cheak(char a){
+ if (a == 'f' || a == 'F') {
+    myservo.write(90);
     delay(250);
-      SV='f';
-      
-            } //a=1
-  }
-  else if (a=='r'||a=='R'){
-if (SV=='r'){
-       }
-      else {
-      myservo.write(45);
-        delay(250);
-      SV='r';
-      
-            } //a=2
-    
-  }
-  else if (a=='l'||a=='L'){
-if (SV=='l'){
-       }
-      else {
-      myservo.write(135);
-        delay(250);
-      SV='l';
-      
-            } //a=3
-    
+  }  else if (a == 'r' || a == 'R') {
+    myservo.write(45);
+    delay(250);
+  }  else if (a == 'l' || a == 'L') {
+    myservo.write(135);
+    delay(250);
+  } else {
+    myservo.write(90);
   }
 }
