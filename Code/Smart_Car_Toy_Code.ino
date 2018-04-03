@@ -17,7 +17,7 @@
 Servo myservo;
 SoftwareSerial BTSerial(HC_05_TXD_ARDUINO_RXD, HC_05_RXD_ARDUINO_TXD); // RX | TX
 String BD = "";
-char IBD= 0;
+char IBD = 0;
 char IPBD = 0;
 
 void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
@@ -311,7 +311,7 @@ int ping_read(){
   duration = pulseIn(ping_ecc, HIGH);
   cm = duration / 29 / 2 ;
   delay(2);
- return cm;
+  return cm;
 }
 
 
