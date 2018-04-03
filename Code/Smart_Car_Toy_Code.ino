@@ -231,72 +231,72 @@ void Drive_T() {
     }
     if (BD == "F" || BD == "f" ) {
       if (IPBD == 'F') {
-         if (!anti_crush(15)){ 
-            Motion(0 , 100, 0);
-         }
-      } else {
-         Motion(6 , 0, 0);
-         IPBD = 'F';
-         servo_cheak(IPBD);
-      }
-    } else if (BD == "B" || BD == "b") {
-      if (IPBD == 'B') {
-         Motion(1 , 100, 0);
-       } else {
-         Motion(6 , 0, 0);
-         IPBD = 'B';
-         servo_cheak(IPBD);
-       }
-    } else if (BD == "R" || BD == "r" ) {
-      if (IPBD == 'R') {
-         if (!anti_crush(15)){
-            Motion(2 , 100, 25);
-           }
-        } else {
-          Motion(6 , 0, 0);
-          IPBD = 'R';
-          servo_cheak(IPBD);
-        }
-      } else if (BD == "L" || BD == "l") {
-        if (IPBD == 'L') {
-          if (!anti_crush(15)){
-            Motion(3 , 100, 25);
-          }
-        } else {
-          Motion(6 , 0, 0);
-          IPBD = 'L';
-          servo_cheak(IPBD);
-        }
-      } else if (BD == "V" || BD == "v") {
-        if (IPBD == 'V') {
-          Motion(4 , 100, 25);
-        } else {
-          Motion(6 , 0, 0);
-          IPBD = 'V';
-          servo_cheak(IPBD);
-        }
-      } else if (BD == "W" || BD == "w") {
-        if (IPBD == 'W') {
-          Motion(5 , 100, 25);
-        } else {
-          Motion(6 , 0, 0);
-          IPBD = 'W';
-           servo_cheak(IPBD);
-        }
-      } else if (BD == "A" || BD == "a") {
-        if (IPBD == 'A') {
-          Motion(2 , 100, 100);
-        } else {
-          Motion(6 , 0, 0);
-          IPBD = 'A';
-          servo_cheak(IPBD);
+        if (!anti_crush(15)){ 
+          Motion(0 , 100, 0);
         }
       } else {
         Motion(6 , 0, 0);
-        IPBD = 'S';
+        IPBD = 'F';
         servo_cheak(IPBD);
       }
-   }
+    } else if (BD == "B" || BD == "b") {
+      if (IPBD == 'B') {
+        Motion(1 , 100, 0);
+      } else {
+        Motion(6 , 0, 0);
+        IPBD = 'B';
+        servo_cheak(IPBD);
+      }
+    } else if (BD == "R" || BD == "r" ) {
+      if (IPBD == 'R') {
+        if (!anti_crush(15)){
+          Motion(2 , 100, 25);
+        }
+      } else {
+        Motion(6 , 0, 0);
+        IPBD = 'R';
+        servo_cheak(IPBD);
+      }
+    } else if (BD == "L" || BD == "l") {
+      if (IPBD == 'L') {
+        if (!anti_crush(15)){
+          Motion(3 , 100, 25);
+        }
+      } else {
+        Motion(6 , 0, 0);
+        IPBD = 'L';
+        servo_cheak(IPBD);
+      }
+    } else if (BD == "V" || BD == "v") {
+      if (IPBD == 'V') {
+        Motion(4 , 100, 25);
+      } else {
+        Motion(6 , 0, 0);
+        IPBD = 'V';
+        servo_cheak(IPBD);
+      }
+    } else if (BD == "W" || BD == "w") {
+      if (IPBD == 'W') {
+        Motion(5 , 100, 25);
+      } else {
+        Motion(6 , 0, 0);
+        IPBD = 'W';
+        servo_cheak(IPBD);
+      }
+    } else if (BD == "A" || BD == "a") {
+      if (IPBD == 'A') {
+        Motion(2 , 100, 100);
+      } else {
+        Motion(6 , 0, 0);
+        IPBD = 'A';
+        servo_cheak(IPBD);
+      }
+    } else {
+      Motion(6 , 0, 0);
+      IPBD = 'S';
+      servo_cheak(IPBD);
+    }
+  }
   BTSerial.println("Trminate easy Driving Mode");
 }
 
