@@ -21,4 +21,5 @@ It is required to develop a Mobile Controlled Car. The car allow easy driving wi
 ##### [Sheet of Materials & Cost](https://github.com/IbrahimAmrIbrahim/ASUMobiCarG15/blob/master/Components%20and%20Prices.md)
 
 ##### [Phase 1 (Easy Driving) Video](https://youtu.be/0QlZfR41Fuo)
-##### [Phase 2 (Line Tracking) Video](https://www.youtube.com/watch?v=OyyD0NaCylI)
+##### [Phase 2 (Line Tracking) Video_1](https://www.youtube.com/watch?v=OyyD0NaCylI)
+##### [Phase 2 (Line Tracking) Video_2](https://www.youtube.com/watch?v=fPJhWKm04iU)
