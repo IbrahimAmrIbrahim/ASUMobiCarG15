@@ -13,6 +13,16 @@
 #define SERVO 9
 #define ping_tri 26
 #define ping_ecc 27
+//Line Tracking Sensors
+#define S1P 50
+#define S2P 42
+#define S3P 45
+#define S1G 46
+#define S2G 51
+#define S3G 52
+#define S1S 48
+#define S2S 53
+#define S3S 43
 
 Servo myservo;
 SoftwareSerial BTSerial(HC_05_TXD_ARDUINO_RXD, HC_05_RXD_ARDUINO_TXD); // RX | TX
@@ -25,6 +35,7 @@ void Drive_T();
 int ping_read();
 bool anti_crush();
 void servo_cheak(char a);
+void Follow();
 
 void setup() {
   //Motor Driver Pins
@@ -43,6 +54,23 @@ void setup() {
   pinMode(ping_ecc, INPUT);
   myservo.attach(SERVO);
   myservo.write(90);
+  
+  //Line Tracking Sensors Pins
+  pinMode(S1P, OUTPUT);
+  digitalWrite(S1P, HIGH);
+  pinMode(S2P, OUTPUT);
+  digitalWrite(S2P, HIGH);
+  pinMode(S3P, OUTPUT);
+  digitalWrite(S3P, HIGH);
+  pinMode(S1G, OUTPUT);
+  digitalWrite(S1G, LOW);
+  pinMode(S2G, OUTPUT);
+  digitalWrite(S2G, LOW);
+  pinMode(S3G, OUTPUT);
+  digitalWrite(S3G, LOW);
+  pinMode(S1S, INPUT);
+  pinMode(S2S, INPUT);
+  pinMode(S3S, INPUT);
 
   Serial.begin(9600);
   BTSerial.begin(9600);  // HC-05 default speed in AT command mode
@@ -56,7 +84,9 @@ void loop() {
     IBD = char(BTSerial.read());
     if (IBD == ';') {
       if (BD == "EDT" || BD == "edt") {
-           Drive_T();
+        Drive_T();
+      } else if (BD == "LT" || BD == "lt") {
+        Follow();
       } else {
         BTSerial.println("Wrong Command");
       }
@@ -340,4 +370,33 @@ void servo_cheak(char a){
   } else {
     myservo.write(90);
   }
+}
+
+
+void Follow() {
+  bool L1 ; bool Mid ; bool R1;
+  bool White = 0;
+  bool Black = 1;
+  BTSerial.println("Line Tracking Mode");
+  while ((BD != "E") && (BD != "e")) {
+    if (BTSerial.available()) {
+      BD = char(BTSerial.read());
+    }
+    if  (BD == "I" || BD == "i") {
+      L1 = digitalRead(S1S);
+      Mid = digitalRead(S2S);
+      R1 = digitalRead(S3S);
+      if (L1 == Black && Mid == White  && R1 == White) {
+        Motion(3 , 80 , 50);
+      } else if (L1 == White  && Mid == White && R1 == Black) {
+        Motion(2 , 80 , 50);
+      } else if (Mid == Black) {
+        Motion (0 , 50 , 0);
+      }
+    } else if (BD == "S" || BD == "s") {
+      Motion (6 , 0 , 0);
+      BD = "";
+    }
+  }
+  BTSerial.println("Trminate Line Tracking Mode");
 }
