@@ -1,9 +1,10 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
+#include<Wire.h>
 
 //Bluetooth
-#define HC_05_TXD_ARDUINO_RXD 10
-#define HC_05_RXD_ARDUINO_TXD 11
+#define Hc_05_TXD_ARDUINO_RXD 10
+#define Hc_05_RXD_ARDUINO_TXD 11
 //Motor Driver
 #define MIN1 3
 #define MIN2 4
@@ -11,34 +12,47 @@
 #define MIN4 6
 //UltraSonic
 #define SERVO 9
-#define ping_tri 26
-#define ping_ecc 27
+#define ping_trig 26
+#define ping_echo 27
 //Line Tracking Sensors
-#define S1P 50
-#define S2P 42
-#define S3P 45
-#define S1G 46
-#define S2G 51
-#define S3G 52
-#define S1S 48
-#define S2S 53
-#define S3S 43
+#define LT1P 50
+#define LT2P 42
+#define LT3P 45
+#define LT1G 46
+#define LT2G 51
+#define LT3G 52
+#define LT1S 48
+#define LT2S 53
+#define LT3S 43
+//Light interrupt
+#define LIP 2
+#define LIG 2
+#define LIS 2
+//Gyroscope
+#define GyroP 2
+#define GyroG 2
+#define GyroAD0 2
 
 Servo myservo;
-SoftwareSerial BTSerial(HC_05_TXD_ARDUINO_RXD, HC_05_RXD_ARDUINO_TXD); // RX | TX
+SoftwareSerial BTSerial(Hc_05_TXD_ARDUINO_RXD, Hc_05_RXD_ARDUINO_TXD); // RX | TX
 String BD = "";
 char IBD = 0;
 char IPBD = 0;
+const int MPU_addr = 0x68;
+int16_t Gz ;
+volatile int LI_Count = 0 ;
 
 void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
-void Drive_T();
+void Drive();
 int ping_read();
 bool anti_crush();
-int steps_counter();
-void servo_cheak(char a);
-float string_to_float();
-void move_with_steps(int x ,char y,float angle);
+void servo_check(char a);
 void Follow();
+int steps_counter();
+float string_to_float();
+void move_with_steps(int x , char y);
+void count() ;
+void accurate_motion() ;
 
 void setup() {
   //Motor Driver Pins
@@ -50,34 +64,50 @@ void setup() {
   digitalWrite(MIN3, LOW);
   pinMode(MIN4, OUTPUT);
   digitalWrite(MIN4, LOW);
-  
+
   //UltraSonic Pins
-  pinMode(ping_tri, OUTPUT);
-  digitalWrite(ping_tri, LOW);
-  pinMode(ping_ecc, INPUT);
+  pinMode(ping_trig, OUTPUT);
+  digitalWrite(ping_trig, LOW);
+  pinMode(ping_echo, INPUT);
   myservo.attach(SERVO);
   myservo.write(90);
-  
+
   //Line Tracking Sensors Pins
-  pinMode(S1P, OUTPUT);
-  digitalWrite(S1P, HIGH);
-  pinMode(S2P, OUTPUT);
-  digitalWrite(S2P, HIGH);
-  pinMode(S3P, OUTPUT);
-  digitalWrite(S3P, HIGH);
-  pinMode(S1G, OUTPUT);
-  digitalWrite(S1G, LOW);
-  pinMode(S2G, OUTPUT);
-  digitalWrite(S2G, LOW);
-  pinMode(S3G, OUTPUT);
-  digitalWrite(S3G, LOW);
-  pinMode(S1S, INPUT);
-  pinMode(S2S, INPUT);
-  pinMode(S3S, INPUT);
+  pinMode(LT1P, OUTPUT);
+  digitalWrite(LT1P, HIGH);
+  pinMode(LT2P, OUTPUT);
+  digitalWrite(LT2P, HIGH);
+  pinMode(LT3P, OUTPUT);
+  digitalWrite(LT3P, HIGH);
+  pinMode(LT1G, OUTPUT);
+  digitalWrite(LT1G, LOW);
+  pinMode(LT2G, OUTPUT);
+  digitalWrite(LT2G, LOW);
+  pinMode(LT3G, OUTPUT);
+  digitalWrite(LT3G, LOW);
+  pinMode(LT1S, INPUT);
+  pinMode(LT2S, INPUT);
+  pinMode(LT3S, INPUT);
+
+  //Light interrupt Pins
+  pinMode(LIP, OUTPUT) ;
+  digitalWrite(LIP, HIGH);
+  pinMode(LIG, OUTPUT) ;
+  digitalWrite(LIG, LOW);
+  pinMode(LIS, INPUT);
+  attachInterrupt(digitalPinToInterrupt(LIS), count, RISING) ;
+
+  //Gyroscope
+  pinMode(GyroP, OUTPUT) ;
+  digitalWrite(GyroP, HIGH);
+  pinMode(GyroG, OUTPUT) ;
+  digitalWrite(GyroG, LOW);
+  pinMode(GyroAD0, OUTPUT) ;
+  digitalWrite(GyroAD0, LOW);
 
   Serial.begin(9600);
-  BTSerial.begin(9600);  // HC-05 default speed in AT command mode
-  BTSerial.println("Car is ready");
+  BTSerial.begin(9600);  // Hc-05 default speed in AT command mode
+  BTSerial.println("car is ready");
 }
 
 
@@ -86,12 +116,14 @@ void loop() {
   if (BTSerial.available()) {
     IBD = char(BTSerial.read());
     if (IBD == ';') {
-      if (BD == "EDT" || BD == "edt") {
-        Drive_T();
+      if (BD == "ED" || BD == "ed") {
+        Drive();
       } else if (BD == "LT" || BD == "lt") {
         Follow();
+      } else if (BD == "AM" || BD == "am") {
+        accurate_motion() ;
       } else {
-        BTSerial.println("Wrong Command");
+        BTSerial.println("Wrong command");
       }
       BD = "";
     } else {
@@ -248,7 +280,7 @@ void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0) {
 }
 
 
-void Drive_T() {
+void Drive() {
   //F || f ----> forward
   //B || b ----> backward
   //R || r ----> forward Right
@@ -264,13 +296,13 @@ void Drive_T() {
     }
     if (BD == "F" || BD == "f" ) {
       if (IPBD == 'F') {
-        if (!anti_crush(15)){ 
+        if (!anti_crush(15)) {
           Motion(0 , 100, 0);
         }
       } else {
         Motion(6 , 0, 0);
         IPBD = 'F';
-        servo_cheak(IPBD);
+        servo_check(IPBD);
       }
     } else if (BD == "B" || BD == "b") {
       if (IPBD == 'B') {
@@ -278,27 +310,27 @@ void Drive_T() {
       } else {
         Motion(6 , 0, 0);
         IPBD = 'B';
-        servo_cheak(IPBD);
+        servo_check(IPBD);
       }
     } else if (BD == "R" || BD == "r" ) {
       if (IPBD == 'R') {
-        if (!anti_crush(15)){
+        if (!anti_crush(15)) {
           Motion(2 , 100, 25);
         }
       } else {
         Motion(6 , 0, 0);
         IPBD = 'R';
-        servo_cheak(IPBD);
+        servo_check(IPBD);
       }
     } else if (BD == "L" || BD == "l") {
       if (IPBD == 'L') {
-        if (!anti_crush(15)){
+        if (!anti_crush(15)) {
           Motion(3 , 100, 25);
         }
       } else {
         Motion(6 , 0, 0);
         IPBD = 'L';
-        servo_cheak(IPBD);
+        servo_check(IPBD);
       }
     } else if (BD == "V" || BD == "v") {
       if (IPBD == 'V') {
@@ -306,7 +338,7 @@ void Drive_T() {
       } else {
         Motion(6 , 0, 0);
         IPBD = 'V';
-        servo_cheak(IPBD);
+        servo_check(IPBD);
       }
     } else if (BD == "W" || BD == "w") {
       if (IPBD == 'W') {
@@ -314,7 +346,7 @@ void Drive_T() {
       } else {
         Motion(6 , 0, 0);
         IPBD = 'W';
-        servo_cheak(IPBD);
+        servo_check(IPBD);
       }
     } else if (BD == "A" || BD == "a") {
       if (IPBD == 'A') {
@@ -322,26 +354,26 @@ void Drive_T() {
       } else {
         Motion(6 , 0, 0);
         IPBD = 'A';
-        servo_cheak(IPBD);
+        servo_check(IPBD);
       }
     } else {
       Motion(6 , 0, 0);
       IPBD = 'S';
-      servo_cheak(IPBD);
+      servo_check(IPBD);
     }
   }
   BTSerial.println("Trminate easy Driving Mode");
 }
 
 // read the distance infront of the ping
-int ping_read(){
-  unsigned int  cm ,duration;
-  digitalWrite(ping_tri, LOW);
+int ping_read() {
+  unsigned int  cm , duration;
+  digitalWrite(ping_trig, LOW);
   delayMicroseconds(2);
-  digitalWrite(ping_tri, HIGH);
+  digitalWrite(ping_trig, HIGH);
   delayMicroseconds(5);
-  digitalWrite(ping_tri, LOW);
-  duration = pulseIn(ping_ecc, HIGH);
+  digitalWrite(ping_trig, LOW);
+  duration = pulseIn(ping_echo, HIGH);
   cm = duration / 29 / 2 ;
   delay(2);
   return cm;
@@ -349,19 +381,19 @@ int ping_read(){
 
 
 // if the distance less than 15 cm STOP!
-bool  anti_crush(int x ){// x distance in cm
-  if (ping_read() <= x ){ // if distance less than x ===> stop and return true 
-  Motion(6,0,0);
-  return true;
+bool  anti_crush(int x ) { // x distance in cm
+  if (ping_read() <= x ) { // if distance less than x ===> stop and return true
+    Motion(6, 0, 0);
+    return true;
   } else {
-  return false;
+    return false;
   }
 }
 
 
 //servo
-void servo_cheak(char a){
- if (a == 'f' || a == 'F') {
+void servo_check(char a) {
+  if (a == 'f' || a == 'F') {
     myservo.write(90);
     delay(250);
   }  else if (a == 'r' || a == 'R') {
@@ -375,71 +407,6 @@ void servo_cheak(char a){
   }
 }
 
-float string_to_float(){ // enter string as 123.26; return 123.26
-String user_input = "";
-char input='0' ;
-  float float_number;
-  while ((input != ';')){  // read the distance as string tell yoy find ;
- if(BTSerial.available()){ // read string
-  input=char(BTSerial.read());
-   if (input==';'){ // to don't add the ; to the input distance
-  break;
- }
-  user_input+=input;
- }
-
-  }    
-   if ( input==';'){// when you find the ;
-    float_number=user_input.toFloat();// transform user distance from string to float
-  
-  return float_number;
-}
-}
-  //========================//
-  int steps_counter(){ // give it distance for example 12 return 12/1.625 ( the unit step as cm ) and cell or floor the number to get the min error 
-  float distance;
-  float real_distance; // the distance/1.625 but celled or floored 
-  float my_dumy; // equal to distance
-  float deff; // deff betwien the distance /1.625 in float - distabce /1.625 in int 
-
-    distance = string_to_float();
-    real_distance=distance/1.625;  // make copy of distance / 1.625 ( resolution )
-    my_dumy= distance; // make sec copy to operate on it as int 
-    distance= distance/1.625 ; // distance /1.625 = no of steps for example 10.3 times high from light sensor
-    my_dumy= int(my_dumy/1.625); // distance /1.625 = 10 because it's int 
-   deff = distance-my_dumy ; // 10.3 - 10 = 0.3 
-   deff = deff-0.5; // 0.3 - 0.5 = negative 0.2
-   if ( deff >0){ 
-    real_distance =ceil(real_distance);
-   }//if  deff float > 0 
-   else if ( deff<0){ // deff is negative 
-    real_distance= floor(real_distance); // read 10 times high from the sensor is most optmize solution
-   } //if  deff <0
-   
-    
-   return real_distance;
- }
-//===========================//
-void move_with_steps(int x ,char y,float angle){ // give it x = step numbers = the light entrupter count number ,y the direction , angle the angle //
-  if (y=='f'&&angle==0){
-for (int i =0;i<x&&digitalRead(LS);i++){// as you read high and counter didn't reach the real distance
-      
-    Motion(0 , 100, 0) ; // move motors forward
-    }// for loop
-}// if f
-if (y=='b'&&angle==0){
-  for (int i =0;i<x&&digitalRead(LS);i++){// as you read high and counter didn't reach the real distance
-      
-           Motion(1 , 100, 0);  // move backward
-    
-    }// for loop
-  
-}// if b
- Motion(6 , 0, 0); // STOP!
-}// angle funtion will be added by ashraf later
-//==================================================//
-=======
-
 
 void Follow() {
   bool L1 ; bool Mid ; bool R1;
@@ -451,9 +418,9 @@ void Follow() {
       BD = char(BTSerial.read());
     }
     if  (BD == "I" || BD == "i") {
-      L1 = digitalRead(S1S);
-      Mid = digitalRead(S2S);
-      R1 = digitalRead(S3S);
+      L1 = digitalRead(LT1S);
+      Mid = digitalRead(LT2S);
+      R1 = digitalRead(LT3S);
       if (L1 == Black && Mid == White  && R1 == White) {
         Motion(3 , 80 , 50);
       } else if (L1 == White  && Mid == White && R1 == Black) {
@@ -469,3 +436,213 @@ void Follow() {
   BTSerial.println("Trminate Line Tracking Mode");
 }
 
+
+float string_to_float() {
+  String user_input = "";
+  char input = '0' ;
+  float float_number;
+  while (true) {
+    if (BTSerial.available()) {
+      input = char(BTSerial.read());
+      if (input == ';') {
+        break;
+      }
+      user_input += input;
+    }
+  }
+  if ( input == ';') {
+    float_number = user_input.toFloat();
+    return float_number;
+  }
+}
+
+int steps_counter() {
+  // give it distance for example 12 return 12/1.625 ( the unit step as cm ) and cell or floor the number to get the min error
+  float distance;
+  float real_distance; // the distance/1.625 but celled or floored
+  float my_dumy; // equal to distance
+  float deff; // deff betwien the distance /1.625 in float - distabce /1.625 in int
+
+  distance = string_to_float();
+  real_distance = distance / 0.9739; // make copy of distance / 1.625 ( resolution )
+  my_dumy = distance; // make sec copy to operate on it as int
+  distance = distance / 0.9739 ; // distance /1.625 = no of steps for example 10.3 times high from light sensor
+  my_dumy = int(my_dumy / 0.9739); // distance /1.625 = 10 because it's int
+  deff = distance - my_dumy ; // 10.3 - 10 = 0.3
+  deff = deff - 0.5; // 0.3 - 0.5 = negative 0.2
+  if ( deff > 0) {
+    real_distance = ceil(real_distance);
+  }//if  deff float > 0
+  else if ( deff < 0) { // deff is negative
+    real_distance = floor(real_distance); // read 10 times high from the sensor is most optmize solution
+  } //if  deff <0
+
+  return real_distance;
+}
+
+
+void move_with_steps(int x , char y) {
+  // give it x = step numbers = the light entrupter count number ,y the direction
+  if (y == 'f' || y == 'F') {
+    LI_Count = 0 ;
+    while (true) {
+      analogWrite(MIN2, 0);
+      analogWrite(MIN3, 0);
+      analogWrite(MIN1, 225);
+      analogWrite(MIN4, 210); // move motors forward
+      if (LI_Count >= x) {
+        Motion(6, 0, 0) ;
+        break ;
+      }
+    }
+  }
+  if (y == 'b' || y == 'B') {
+    LI_Count = 0 ;
+    while (true) {
+      analogWrite(MIN1, 0);
+      analogWrite(MIN4, 0);
+      analogWrite(MIN2, 249);
+      analogWrite(MIN3, 237); // move motors backward
+      if (LI_Count >= x) {
+        Motion(6, 0, 0) ;
+        break ;
+      }
+    }
+  }
+  Motion(6, 0, 0) ;
+}
+
+
+void angle (float ra) {
+  // ra is required angle
+  float t , tp , gs , a = 0;
+  Wire.begin(); // disabling sleep mode of the gyro
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x6B);
+  Wire.write(0);
+  Wire.endTransmission(true);
+  while ((ra > 180) || (ra < -180)) { // making ra between -180 , 180
+    if (ra < -180) {
+      ra = ra + 360 ;
+    }
+    if (ra > 180) {
+      ra = ra - 360 ;
+    }
+  }
+  if (ra > 0) {
+    Motion(3, 35, 100) ; //turn left around car axis
+  } else if (ra < 0) {
+    Motion(4, 35, 100) ; //turn right around car axis
+  } else {
+    Motion(6, 0, 0) ; // stop
+  }
+  t = millis() ; // taking initial value of time
+  while (1) {
+    tp = t ;
+    t = millis() ;
+    Wire.beginTransmission(MPU_addr);
+    Wire.write(0x47);
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU_addr, 2, true);
+    Gz = Wire.read() << 8 | Wire.read(); // Gz is the angular velocity
+    gs = Gz / 131.0 ; // 131 is the gyro scale
+    a = a + gs * ((t - tp) / 1000) ;
+
+    if (a >= 360) {
+      a = a - 360 ;
+    } else if (a <= -360) {
+      a = a + 360 ;
+    }
+    if (ra > 0) {
+      if (a >= ra) {
+        Motion(6, 0, 0) ;
+        break ;
+      }
+    } else if (ra < 0) {
+      if (a <= ra) {
+        Motion(6, 0, 0) ;
+        break ;
+      }
+    } else {
+      break ;
+    }
+  }
+}
+
+
+void count() {
+  LI_Count++ ;
+}
+
+
+void accurate_motion() {
+  char End = '0';
+  float my_angle = 0;
+  int steps = 0;
+  BTSerial.println("Accurate Movement Mode");
+  while ( End != 'e' && End != 'E') {
+    if (BTSerial.available()) {
+      End = char(BTSerial.read());
+    }
+
+    if (End == 'f' || End == 'b' || End == 'F' || End == 'B') {// move with distance
+      BTSerial.println("Enter distance") ;
+      steps = steps_counter();
+      // after taking the distance from user
+      // move with step = real_distance , in direction of End
+      move_with_steps (steps, End);
+    }
+
+    if (End == 'a' || End == 'A') { // move with angle
+      BTSerial.println("Enter angle") ;
+      my_angle = string_to_float();
+      BTSerial.println("Enter distance") ;
+      steps = steps_counter();
+      angle(my_angle) ;
+      move_with_steps(steps, 'f');
+    }
+
+    if (End == 'h' || End == 'H') {
+      // infinity
+      angle (30) ;
+      move_with_steps(45, 'f') ;
+      for (int i = 0 ; i < 45 ; i++) {
+        LI_Count = 0 ;
+        move_with_steps(2, 'f') ;
+        Motion(6, 0, 0) ;
+        angle(-3) ;
+      }
+      move_with_steps(110, 'f') ;
+      for (int i = 0 ; i < 40; i++) {
+        LI_Count = 0 ;
+        move_with_steps(2, 'f') ;
+        Motion(6, 0, 0) ;
+        angle(3) ;
+      }
+      move_with_steps(45, 'f') ;
+      angle(-30) ;
+
+      delay(25000) ;
+      // square
+      for (int i = 0 ; i < 4 ; i++) {
+        LI_Count = 0 ;
+        move_with_steps(201, 'f') ;
+        Motion(6, 0, 0) ;
+        angle(85) ; //90 degree
+      }
+
+      delay(25000) ;
+      // circle
+      LI_Count = 0 ;
+      for (int i = 0 ; i < 55 ; i++) {
+        LI_Count = 0 ;
+        move_with_steps(8, 'f') ;
+        Motion(6, 0, 0) ;
+        angle(3) ;
+      }
+      Motion(6, 0, 0) ;
+    }
+    End = '0';
+  }
+  BTSerial.println("Terminate Accurate Movement Mode");
+}
