@@ -486,7 +486,10 @@ void move_with_steps(int x , char y) {
   if (y == 'f' || y == 'F') {
     LI_Count = 0 ;
     while (true) {
-      Motion(0, 50, 0) ; // move motors forward
+      analogWrite(MIN2, 0);
+      analogWrite(MIN3, 0);
+      analogWrite(MIN1, 225);
+      analogWrite(MIN4, 210); // move motors forward
       if (LI_Count >= x) {
         Motion(6, 0, 0) ;
         break ;
@@ -496,7 +499,10 @@ void move_with_steps(int x , char y) {
   if (y == 'b' || y == 'B') {
     LI_Count = 0 ;
     while (true) {
-      Motion(1, 50, 0) ; // move motors backward
+      analogWrite(MIN1, 0);
+      analogWrite(MIN4, 0);
+      analogWrite(MIN2, 249);
+      analogWrite(MIN3, 237); // move motors backward
       if (LI_Count >= x) {
         Motion(6, 0, 0) ;
         break ;
