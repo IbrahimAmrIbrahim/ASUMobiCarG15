@@ -41,6 +41,7 @@ char IPBD = 0;
 const int MPU_addr = 0x68;
 int16_t Gz ;
 volatile int LI_Count = 0 ;
+bool sent = false;
 
 void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
 void Drive();
@@ -113,14 +114,23 @@ void setup() {
 
 
 void loop() {
+   if (sent == false) {
+    BTSerial.println("Easy driving mode      -----> ED");
+    BTSerial.println("Line tracking mode     -----> LT");
+    BTSerial.println("Accurate Movement mode -----> AM");
+    sent = true;
+  }
   if (BTSerial.available()) {
     IBD = char(BTSerial.read());
     if (IBD == ';') {
       if (BD == "ED" || BD == "ed") {
+        sent = false;
         Drive();
       } else if (BD == "LT" || BD == "lt") {
+        sent = false;
         Follow();
       } else if (BD == "AM" || BD == "am") {
+        sent = false;
         accurate_motion() ;
       } else {
         BTSerial.println("Wrong command");
@@ -290,6 +300,15 @@ void Drive() {
   //A || a ----> rotate around axis
   //S || s ----> stop
   BTSerial.println("Easy Driving Mode");
+  BTSerial.println("forward            ----> F");
+  BTSerial.println("Backward           ----> B");
+  BTSerial.println("Forward Right      ----> R");
+  BTSerial.println("Forward Left       ----> L");
+  BTSerial.println("Backward Right     ----> V");
+  BTSerial.println("Backward Left      ----> W");
+  BTSerial.println("Rotate around axis ----> A");
+  BTSerial.println("stop               ----> S");
+  BTSerial.println("Exit               ----> E");
   while ((BD != "E") && (BD != "e")) {
     if (BTSerial.available()) {
       BD = char(BTSerial.read());
@@ -413,6 +432,9 @@ void Follow() {
   bool White = 0;
   bool Black = 1;
   BTSerial.println("Line Tracking Mode");
+  BTSerial.println("Start -----> I");
+  BTSerial.println("Stop  -----> S");
+  BTSerial.println("Exit  -----> E");  
   while ((BD != "E") && (BD != "e")) {
     if (BTSerial.available()) {
       BD = char(BTSerial.read());
@@ -580,6 +602,10 @@ void accurate_motion() {
   float my_angle = 0;
   int steps = 0;
   BTSerial.println("Accurate Movement Mode");
+  BTSerial.println("Distance ----> F/B");
+  BTSerial.println("Angle    ----> A");
+  BTSerial.println("Demo     ----> H");
+  BTSerial.println("Exit     ----> E");  
   while ( End != 'e' && End != 'E') {
     if (BTSerial.available()) {
       End = char(BTSerial.read());
@@ -622,6 +648,7 @@ void accurate_motion() {
       move_with_steps(45, 'f') ;
       angle(-30) ;
 
+      BTSerial.println("Infinity Done");
       delay(25000) ;
       // square
       for (int i = 0 ; i < 4 ; i++) {
@@ -631,6 +658,7 @@ void accurate_motion() {
         angle(85) ; //90 degree
       }
 
+      BTSerial.println("Square Done");
       delay(25000) ;
       // circle
       LI_Count = 0 ;
@@ -641,6 +669,7 @@ void accurate_motion() {
         angle(3) ;
       }
       Motion(6, 0, 0) ;
+      BTSerial.println("Circle Done");
     }
     End = '0';
   }
