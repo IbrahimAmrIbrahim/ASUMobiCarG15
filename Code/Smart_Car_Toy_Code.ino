@@ -34,7 +34,10 @@ void Motion(byte Direction , byte MSpeed = 100 , byte RSpeed = 0);
 void Drive_T();
 int ping_read();
 bool anti_crush();
+int steps_counter();
 void servo_cheak(char a);
+float string_to_float();
+void move_with_steps(int x ,char y,float angle);
 void Follow();
 
 void setup() {
@@ -372,6 +375,71 @@ void servo_cheak(char a){
   }
 }
 
+float string_to_float(){ // enter string as 123.26; return 123.26
+String user_input = "";
+char input='0' ;
+  float float_number;
+  while ((input != ';')){  // read the distance as string tell yoy find ;
+ if(BTSerial.available()){ // read string
+  input=char(BTSerial.read());
+   if (input==';'){ // to don't add the ; to the input distance
+  break;
+ }
+  user_input+=input;
+ }
+
+  }    
+   if ( input==';'){// when you find the ;
+    float_number=user_input.toFloat();// transform user distance from string to float
+  
+  return float_number;
+}
+}
+  //========================//
+  int steps_counter(){ // give it distance for example 12 return 12/1.625 ( the unit step as cm ) and cell or floor the number to get the min error 
+  float distance;
+  float real_distance; // the distance/1.625 but celled or floored 
+  float my_dumy; // equal to distance
+  float deff; // deff betwien the distance /1.625 in float - distabce /1.625 in int 
+
+    distance = string_to_float();
+    real_distance=distance/1.625;  // make copy of distance / 1.625 ( resolution )
+    my_dumy= distance; // make sec copy to operate on it as int 
+    distance= distance/1.625 ; // distance /1.625 = no of steps for example 10.3 times high from light sensor
+    my_dumy= int(my_dumy/1.625); // distance /1.625 = 10 because it's int 
+   deff = distance-my_dumy ; // 10.3 - 10 = 0.3 
+   deff = deff-0.5; // 0.3 - 0.5 = negative 0.2
+   if ( deff >0){ 
+    real_distance =ceil(real_distance);
+   }//if  deff float > 0 
+   else if ( deff<0){ // deff is negative 
+    real_distance= floor(real_distance); // read 10 times high from the sensor is most optmize solution
+   } //if  deff <0
+   
+    
+   return real_distance;
+ }
+//===========================//
+void move_with_steps(int x ,char y,float angle){ // give it x = step numbers = the light entrupter count number ,y the direction , angle the angle //
+  if (y=='f'&&angle==0){
+for (int i =0;i<x&&digitalRead(LS);i++){// as you read high and counter didn't reach the real distance
+      
+    Motion(0 , 100, 0) ; // move motors forward
+    }// for loop
+}// if f
+if (y=='b'&&angle==0){
+  for (int i =0;i<x&&digitalRead(LS);i++){// as you read high and counter didn't reach the real distance
+      
+           Motion(1 , 100, 0);  // move backward
+    
+    }// for loop
+  
+}// if b
+ Motion(6 , 0, 0); // STOP!
+}// angle funtion will be added by ashraf later
+//==================================================//
+=======
+
 
 void Follow() {
   bool L1 ; bool Mid ; bool R1;
@@ -400,3 +468,4 @@ void Follow() {
   }
   BTSerial.println("Trminate Line Tracking Mode");
 }
+
