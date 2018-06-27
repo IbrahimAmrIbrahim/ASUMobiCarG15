@@ -28,6 +28,10 @@
 #define LIP 2
 #define LIG 2
 #define LIS 2
+//Gyroscope
+#define GyroP 2
+#define GyroG 2
+#define GyroAD0 2
 
 Servo myservo;
 SoftwareSerial BTSerial(Hc_05_TXD_ARDUINO_RXD, Hc_05_RXD_ARDUINO_TXD); // RX | TX
@@ -93,11 +97,13 @@ void setup() {
   pinMode(LIS, INPUT);
   attachInterrupt(digitalPinToInterrupt(LIS), count, RISING) ;
 
-
-  pinMode(13, OUTPUT) ;
-  digitalWrite(13, HIGH);
-  pinMode(14, OUTPUT) ;
-  digitalWrite(14, HIGH);
+  //Gyroscope
+  pinMode(GyroP, OUTPUT) ;
+  digitalWrite(GyroP, HIGH);
+  pinMode(GyroG, OUTPUT) ;
+  digitalWrite(GyroG, LOW);
+  pinMode(GyroAD0, OUTPUT) ;
+  digitalWrite(GyroAD0, LOW);
 
   Serial.begin(9600);
   BTSerial.begin(9600);  // Hc-05 default speed in AT command mode
