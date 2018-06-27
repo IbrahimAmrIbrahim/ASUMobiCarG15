@@ -622,7 +622,7 @@ void accurate_motion() {
       move_with_steps(45, 'f') ;
       angle(-30) ;
 
-      delay(5000) ;
+      delay(25000) ;
       // square
       for (int i = 0 ; i < 4 ; i++) {
         LI_Count = 0 ;
@@ -631,7 +631,7 @@ void accurate_motion() {
         angle(85) ; //90 degree
       }
 
-      delay(5000) ;
+      delay(25000) ;
       // circle
       LI_Count = 0 ;
       for (int i = 0 ; i < 55 ; i++) {
