@@ -503,37 +503,66 @@ int steps_counter() {
 }
 
 
-void move_with_steps(int x , char y) {
-  // give it x = step numbers = the light entrupter count number ,y the direction
-  if (y == 'f' || y == 'F') {
-    LI_Count = 0 ;
-    while (true) {
-      analogWrite(MIN2, 0);
-      analogWrite(MIN3, 0);
-      analogWrite(MIN1, 225);
-      analogWrite(MIN4, 210); // move motors forward
-      if (LI_Count >= x) {
-        Motion(6, 0, 0) ;
-        break ;
+void move_with_steps(int x ,char y,float angle){
+     if (x >=10 && y != 't'){
+       x=x-6;
       }
-    }
-  }
-  if (y == 'b' || y == 'B') {
-    LI_Count = 0 ;
-    while (true) {
-      analogWrite(MIN1, 0);
-      analogWrite(MIN4, 0);
-      analogWrite(MIN2, 249);
-      analogWrite(MIN3, 237); // move motors backward
-      if (LI_Count >= x) {
-        Motion(6, 0, 0) ;
+      //Serial.println(x);
+    // give it x = step numbers = the light entrupter count number ,y the direction , angle the angle //
+      if ((y=='f'||y=='F')&&angle==0){
+      
+      c = 0 ;
+     while(1){
+    //Motion(3,50,0) ; // move motors forward
+      analogWrite(5,0);
+      analogWrite(6,0);
+      analogWrite(3,127.962);//216
+      analogWrite(10,125);//211
+      
+      if(c >=x ){// was x    only
+        Motion(1,25,0);
+        delay(50);
+        Motion(6,0,0) ;
         break ;
-      }
-    }
-  }
-  Motion(6, 0, 0) ;
-}
+      }  
+   } // while loop
+  } // if f
+   if((y=='b'||y=='B')&&angle==0){
+    c = 0 ;
+    while(1){
+     // Motion(1,50,0) ; // move motors backward
+       analogWrite(3,0);
+      analogWrite(10,0);
+      analogWrite(5,125);
+      analogWrite(6,127.9620853);
+     //Serial.println(c);
+      if(c >= x){// was x 
+        Motion(0,25,0);
+        delay(50);
+        Motion(6,0,0) ;
+        break ;
+      }  
+    } // while loop
+   } // if b
+//===========================//
+   if((y=='t'||y=='T')&&angle==0){
+     c = 0 ;
+     while(1){
+    //Motion(3,50,0) ; // move motors forward
+      analogWrite(5,0);
+      analogWrite(6,0);
+      analogWrite(3,225);
+      analogWrite(10,210);
+      
+      if(c >= x){
+        Motion(6,0,0) ;
+        break ;
+      }  
+   } // while loop
+  } // if t
 
+   Motion(6,0,0) ; // Stop 
+ }
 
 void angle (float ra) {
   // ra is required angle
@@ -597,81 +626,104 @@ void count() {
 }
 
 
-void accurate_motion() {
-  char End = '0';
-  float my_angle = 0;
-  int steps = 0;
-  BTSerial.println("Accurate Movement Mode");
-  BTSerial.println("Distance ----> F/B");
-  BTSerial.println("Angle    ----> A");
-  BTSerial.println("Demo     ----> H");
-  BTSerial.println("Exit     ----> E");  
-  while ( End != 'e' && End != 'E') {
-    if (BTSerial.available()) {
-      End = char(BTSerial.read());
+void accurate_motion(){
+  char End='0';
+  float my_angle=0;
+  int steps=0;
+
+ while( End !='e' && End!='E'){ // while he didn't get e
+  if (Serial.available()){
+    End=char(Serial.read());
+    if(End=='e' ||End =='E'){
+      End='0';
+      break;
     }
-
-    if (End == 'f' || End == 'b' || End == 'F' || End == 'B') {// move with distance
-      BTSerial.println("Enter distance") ;
-      steps = steps_counter();
-      // after taking the distance from user
-      // move with step = real_distance , in direction of End
-      move_with_steps (steps, End);
-    }
-
-    if (End == 'a' || End == 'A') { // move with angle
-      BTSerial.println("Enter angle") ;
-      my_angle = string_to_float();
-      BTSerial.println("Enter distance") ;
-      steps = steps_counter();
-      angle(my_angle) ;
-      move_with_steps(steps, 'f');
-    }
-
-    if (End == 'h' || End == 'H') {
-      // infinity
-      angle (30) ;
-      move_with_steps(45, 'f') ;
-      for (int i = 0 ; i < 45 ; i++) {
-        LI_Count = 0 ;
-        move_with_steps(2, 'f') ;
-        Motion(6, 0, 0) ;
-        angle(-3) ;
-      }
-      move_with_steps(110, 'f') ;
-      for (int i = 0 ; i < 40; i++) {
-        LI_Count = 0 ;
-        move_with_steps(2, 'f') ;
-        Motion(6, 0, 0) ;
-        angle(3) ;
-      }
-      move_with_steps(45, 'f') ;
-      angle(-30) ;
-
-      BTSerial.println("Infinity Done");
-      delay(25000) ;
-      // square
-      for (int i = 0 ; i < 4 ; i++) {
-        LI_Count = 0 ;
-        move_with_steps(201, 'f') ;
-        Motion(6, 0, 0) ;
-        angle(85) ; //90 degree
-      }
-
-      BTSerial.println("Square Done");
-      delay(25000) ;
-      // circle
-      LI_Count = 0 ;
-      for (int i = 0 ; i < 55 ; i++) {
-        LI_Count = 0 ;
-        move_with_steps(8, 'f') ;
-        Motion(6, 0, 0) ;
-        angle(3) ;
-      }
-      Motion(6, 0, 0) ;
-      BTSerial.println("Circle Done");
-    }
-    End = '0';
   }
-  BTSerial.println("Terminate Accurate Movement Mode");
+  if (End=='f'||End=='b'||End=='F'||End=='B'){ // if he recived f or b only
+    Serial.println("Enter distance ") ;
+    if (End =='f'||'F'==End){
+      Serial.println("Forward");
+     
+    }
+    if (End =='b'||'B'==End){
+      Serial.println("Backward");
+     
+    }
+    steps= steps_counter();
+ // after taking the distance from user
+ // move with step = real_distance , in direction of End
+ delay(5000);
+    move_with_steps (steps,End,0); // take the order for example End = f and the steps 1.625 * real_distance
+
+  }
+
+ if (End=='a'||End=='A'){// move with angle
+  Serial.println("Enter angle") ;
+  my_angle= string_to_float();
+  Serial.println("Enter distance") ;
+  steps= steps_counter();
+  delay(5000);
+  angle(my_angle) ;
+  move_with_steps(steps,'f',0);
+  // ashraf funtion 
+  // my function
+ }
+ if (End=='h'||End=='H'){
+  Serial.println("infinity");
+   // infinity
+   angle (30) ;  
+   move_with_steps(45,'t',0) ;
+   
+   for (int i=0 ; i<45 ; i++){
+    c = 0 ;
+    move_with_steps(2,'t',0) ;
+    Motion(6,0,0) ;
+    angle(-3) ;
+    }
+    
+    move_with_steps(110,'t',0) ;
+    
+    for (int i=0 ; i<40; i++){
+    c = 0 ;
+    move_with_steps(2,'t',0) ;
+    Motion(6,0,0) ;
+    angle(3) ;
+    }
+    
+    move_with_steps(45,'t',0) ;
+    angle(-30) ;
+    delay(10000) ;
+   // square
+Serial.println("rectangle");
+  for(int i=0 ; i<4 ; i++){
+    c = 0 ;  
+      move_with_steps(193,'f',0) ;
+   
+   Motion(6,0,0) ;
+    delay(1000);
+  // Serial.println("flag1");
+    angle(87  ) ; //90 degree 90 -7.1 
+    delay(1000);
+   
+  }
+  delay(10000) ;
+ // circle 
+ Serial.println("circle");
+  c = 0 ; 
+  for (int i=0 ; i<55 ; i++){
+    c = 0 ;
+    move_with_steps(8,'t',0) ;
+    Motion(6,0,0) ;
+    angle(3) ;
+  //  Serial.println("flag 1");
+//    if(c == 645){ // 645 is the number of steps
+//      Motion(6,0,0) ;
+//      break ;
+//    }
+  }
+//Serial.println("flag 2");
+  Motion(6,0,0) ;
+ }
+   End='0';
+   }//while   
 }
