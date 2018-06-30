@@ -511,15 +511,13 @@ void move_with_steps(int x , char y) {
   if (y == 'f' || y == 'F') {
     LI_Count = 0 ;
     while (true) {
-      //==========================//
-      analogWrite(MIN2, 0);
+       analogWrite(MIN2, 0);
       analogWrite(MIN3, 0);
-      analogWrite(MIN1, 127.962);
+      analogWrite(MIN1, 128);
       analogWrite(MIN4, 125); // move motors forward
-      //================================//
       if (LI_Count >= x) {
-        Motion(1,25,0);//=========//
-        delay(50);//=========//
+        Motion(1,25,0);
+        delay(50);
         Motion(6, 0, 0) ;
         break ;
       }
@@ -528,37 +526,31 @@ void move_with_steps(int x , char y) {
   if (y == 'b' || y == 'B') {
     LI_Count = 0 ;
     while (true) {
-      //======================//
       analogWrite(MIN1, 0);
       analogWrite(MIN4, 0);
       analogWrite(MIN2, 125);
-      analogWrite(MIN3, 127.9620853); // move motors backward
-      //==================//
+      analogWrite(MIN3, 128); // move motors backward
       if (LI_Count >= x) {
-        Motion(0,25,0);//=============//
-        delay(50);//=================//
+        Motion(0,25,0);
+        delay(50);
         Motion(6, 0, 0) ;
         break ;
       }
     }
   }
-  //===============================//
-  if((y=='t'||y=='T')&&angle==0){
+  if(y=='t'||y=='T'){
      LI_Count = 0 ;
      while(1){
-    //Motion(3,50,0) ; // move motors forward
       analogWrite(MIN2,0);
       analogWrite(MIN3,0);
       analogWrite(MIN1,225);
       analogWrite(MIN4,210);
-      
       if(LI_Count >= x){
         Motion(6,0,0) ;
         break ;
       }  
-   } // while loop
-  } // if t
-  //====================//
+   }
+  }
   Motion(6, 0, 0) ;
 }
 
@@ -659,21 +651,21 @@ void accurate_motion() {
     if (End == 'h' || End == 'H') {
       // infinity
       angle (30) ;
-      move_with_steps(45, 't') ;//==============//
+      move_with_steps(45, 't') ;
       for (int i = 0 ; i < 45 ; i++) {
         LI_Count = 0 ;
-        move_with_steps(2, 't') ;//===================//
+        move_with_steps(2, 't') ;
         Motion(6, 0, 0) ;
         angle(-3) ;
       }
-      move_with_steps(110, 't') ;//=================//
+      move_with_steps(110, 't') ;
       for (int i = 0 ; i < 40; i++) {
         LI_Count = 0 ;
-        move_with_steps(2, 't') ;//==============//
+        move_with_steps(2, 't') ;
         Motion(6, 0, 0) ;
         angle(3) ;
       }
-      move_with_steps(45, 't') ;//==============//
+      move_with_steps(45, 't') ;
       angle(-30) ;
 
       BTSerial.println("Infinity Done");
@@ -681,7 +673,7 @@ void accurate_motion() {
       // square
       for (int i = 0 ; i < 4 ; i++) {
         LI_Count = 0 ;
-        move_with_steps(193, 'f') ;//===============//
+        move_with_steps(193, 'f') ;
         Motion(6, 0, 0) ;
         angle(87) ; //90 degree
       }
@@ -692,7 +684,7 @@ void accurate_motion() {
       LI_Count = 0 ;
       for (int i = 0 ; i < 55 ; i++) {
         LI_Count = 0 ;
-        move_with_steps(8, 't') ;//==========//
+        move_with_steps(8, 't') ;
         Motion(6, 0, 0) ;
         angle(3) ;
       }
