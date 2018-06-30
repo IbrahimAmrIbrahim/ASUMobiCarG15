@@ -511,7 +511,7 @@ void move_with_steps(int x , char y) {
   if (y == 'f' || y == 'F') {
     LI_Count = 0 ;
     while (true) {
-       analogWrite(MIN2, 0);
+      analogWrite(MIN2, 0);
       analogWrite(MIN3, 0);
       analogWrite(MIN1, 128);
       analogWrite(MIN4, 125); // move motors forward
