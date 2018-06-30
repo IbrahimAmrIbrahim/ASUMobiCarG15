@@ -526,6 +526,7 @@ void move_with_steps(int x , char y) {
   if (y == 'b' || y == 'B') {
     LI_Count = 0 ;
     while (true) {
+      //======================//
       analogWrite(MIN1, 0);
       analogWrite(MIN4, 0);
       analogWrite(MIN2, 125);
@@ -538,6 +539,7 @@ void move_with_steps(int x , char y) {
       }
     }
   }
+
   if(y=='t'||y=='T'){
      LI_Count = 0 ;
      while(1){
