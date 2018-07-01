@@ -12,26 +12,28 @@
 #define MIN4 6
 //UltraSonic
 #define SERVO 9
-#define ping_trig 26
-#define ping_echo 27
+#define ping_P 49
+#define ping_G 43
+#define ping_trig 47
+#define ping_echo 45
 //Line Tracking Sensors
-#define LT1P 50
-#define LT2P 42
-#define LT3P 45
-#define LT1G 46
-#define LT2G 51
-#define LT3G 52
-#define LT1S 48
-#define LT2S 53
-#define LT3S 43
+#define LT1P 36
+#define LT2P 30
+#define LT3P 24
+#define LT1G 38
+#define LT2G 32
+#define LT3G 26
+#define LT1S 34
+#define LT2S 28
+#define LT3S 22
 //Light interrupt
-#define LIP 2
-#define LIG 2
+#define LIP 40
+#define LIG 44
 #define LIS 2
 //Gyroscope
-#define GyroP 2
-#define GyroG 2
-#define GyroAD0 2
+#define GyroP 17
+#define GyroG 18
+#define GyroAD0 19
 
 Servo myservo;
 SoftwareSerial BTSerial(Hc_05_TXD_ARDUINO_RXD, Hc_05_RXD_ARDUINO_TXD); // RX | TX
@@ -54,6 +56,7 @@ float string_to_float();
 void move_with_steps(int x , char y);
 void count() ;
 void accurate_motion() ;
+void pinConfiguration(byte mode);
 
 void setup() {
   //Motor Driver Pins
@@ -69,17 +72,21 @@ void setup() {
   //UltraSonic Pins
   pinMode(ping_trig, OUTPUT);
   digitalWrite(ping_trig, LOW);
+   pinMode(ping_P, OUTPUT);
+  digitalWrite(ping_P, LOW);
+  pinMode(ping_G, OUTPUT);
+  digitalWrite(ping_G, LOW);
   pinMode(ping_echo, INPUT);
   myservo.attach(SERVO);
   myservo.write(90);
 
   //Line Tracking Sensors Pins
   pinMode(LT1P, OUTPUT);
-  digitalWrite(LT1P, HIGH);
+  digitalWrite(LT1P, LOW);
   pinMode(LT2P, OUTPUT);
-  digitalWrite(LT2P, HIGH);
+  digitalWrite(LT2P, LOW);
   pinMode(LT3P, OUTPUT);
-  digitalWrite(LT3P, HIGH);
+  digitalWrite(LT3P, LOW);
   pinMode(LT1G, OUTPUT);
   digitalWrite(LT1G, LOW);
   pinMode(LT2G, OUTPUT);
@@ -92,7 +99,7 @@ void setup() {
 
   //Light interrupt Pins
   pinMode(LIP, OUTPUT) ;
-  digitalWrite(LIP, HIGH);
+  digitalWrite(LIP, LOW);
   pinMode(LIG, OUTPUT) ;
   digitalWrite(LIG, LOW);
   pinMode(LIS, INPUT);
@@ -100,7 +107,7 @@ void setup() {
 
   //Gyroscope
   pinMode(GyroP, OUTPUT) ;
-  digitalWrite(GyroP, HIGH);
+  digitalWrite(GyroP, LOW);
   pinMode(GyroG, OUTPUT) ;
   digitalWrite(GyroG, LOW);
   pinMode(GyroAD0, OUTPUT) ;
@@ -109,6 +116,7 @@ void setup() {
   Serial.begin(9600);
   BTSerial.begin(9600);  // Hc-05 default speed in AT command mode
   BTSerial.println("car is ready");
+  delay(1000);
 }
 
 
@@ -125,20 +133,56 @@ void loop() {
     if (IBD == ';') {
       if (BD == "ED" || BD == "ed") {
         sent = false;
+        pinConfiguration(1);
         Drive();
       } else if (BD == "LT" || BD == "lt") {
         sent = false;
+        pinConfiguration(2);
         Follow();
       } else if (BD == "AM" || BD == "am") {
         sent = false;
+        pinConfiguration(3);
         accurate_motion() ;
       } else {
         BTSerial.println("Wrong command");
+        pinConfiguration(4);
       }
       BD = "";
     } else {
       BD += IBD;
     }
+  }
+}
+
+void pinConfiguration (byte mode) {
+  if (mode == 1) {
+    digitalWrite(ping_P, HIGH);
+    digitalWrite(LT1P, LOW);
+    digitalWrite(LT2P, LOW);
+    digitalWrite(LT3P, LOW);
+    digitalWrite(LIP, LOW);
+    digitalWrite(GyroP, LOW);
+  } else if (mode == 2) {
+    digitalWrite(ping_P, LOW);
+    digitalWrite(LT1P, HIGH);
+    digitalWrite(LT2P, HIGH);
+    digitalWrite(LT3P, HIGH);
+    digitalWrite(LIP, LOW);
+    digitalWrite(GyroP, LOW);
+  } else if (mode == 3) {
+    digitalWrite(ping_P, LOW);
+    digitalWrite(LT1P, LOW);
+    digitalWrite(LT2P, LOW);
+    digitalWrite(LT3P, LOW);
+    digitalWrite(LIP, HIGH);
+    digitalWrite(GyroP, HIGH);
+  } else {
+    digitalWrite(ping_P, LOW);
+    digitalWrite(LT1P, LOW);
+    digitalWrite(LT2P, LOW);
+    digitalWrite(LT3P, LOW);
+    digitalWrite(LIP, LOW);
+    digitalWrite(GyroP, LOW);
   }
 }
 
@@ -638,6 +682,7 @@ void accurate_motion() {
       // after taking the distance from user
       // move with step = real_distance , in direction of End
       move_with_steps (steps, End);
+      End = '0';
     }
 
     if (End == 'a' || End == 'A') { // move with angle
@@ -647,6 +692,7 @@ void accurate_motion() {
       steps = steps_counter();
       angle(my_angle) ;
       move_with_steps(steps, 'f');
+      End = '0';
     }
 
     if (End == 'h' || End == 'H') {
@@ -691,8 +737,8 @@ void accurate_motion() {
       }
       Motion(6, 0, 0) ;
       BTSerial.println("Circle Done");
+      End = '0';
     }
-    End = '0';
   }
   BTSerial.println("Terminate Accurate Movement Mode");
 }
