@@ -23,9 +23,9 @@
 #define LT1G 38
 #define LT2G 32
 #define LT3G 26
-#define LT1S 34
+#define LT1S 22
 #define LT2S 28
-#define LT3S 22
+#define LT3S 34
 //Light interrupt
 #define LIP 40
 #define LIG 44
@@ -359,7 +359,7 @@ void Drive() {
     }
     if (BD == "F" || BD == "f" ) {
       if (IPBD == 'F') {
-        if (!anti_crush(15)) {
+        if (!anti_crush(30)) {
           Motion(0 , 100, 0);
         }
       } else {
@@ -377,7 +377,7 @@ void Drive() {
       }
     } else if (BD == "R" || BD == "r" ) {
       if (IPBD == 'R') {
-        if (!anti_crush(15)) {
+        if (!anti_crush(30)) {
           Motion(2 , 100, 25);
         }
       } else {
@@ -387,7 +387,7 @@ void Drive() {
       }
     } else if (BD == "L" || BD == "l") {
       if (IPBD == 'L') {
-        if (!anti_crush(15)) {
+        if (!anti_crush(30)) {
           Motion(3 , 100, 25);
         }
       } else {
@@ -560,9 +560,10 @@ void move_with_steps(int x , char y) {
       analogWrite(MIN1, 128);
       analogWrite(MIN4, 125); // move motors forward
       if (LI_Count >= x) {
+        Motion(6, 0, 0);
         Motion(1,25,0);
         delay(50);
-        Motion(6, 0, 0) ;
+        Motion(6, 0, 0);
         break ;
       }
     }
@@ -575,9 +576,10 @@ void move_with_steps(int x , char y) {
       analogWrite(MIN2, 125);
       analogWrite(MIN3, 128); // move motors backward
       if (LI_Count >= x) {
+        Motion(6, 0, 0);
         Motion(0,25,0);
         delay(50);
-        Motion(6, 0, 0) ;
+        Motion(6, 0, 0);
         break ;
       }
     }
@@ -617,9 +619,9 @@ void angle (float ra) {
     }
   }
   if (ra > 0) {
-    Motion(3, 35, 100) ; //turn left around car axis
+    Motion(4, 35, 100) ; //turn left around car axis
   } else if (ra < 0) {
-    Motion(4, 35, 100) ; //turn right around car axis
+    Motion(3, 35, 100) ; //turn right around car axis
   } else {
     Motion(6, 0, 0) ; // stop
   }
